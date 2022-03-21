@@ -41,23 +41,6 @@ void *perform_work(void *arguments)
   return NULL;
 }
 
-// void *perform_work(void *arguments){
-//   int index = *((int *)arguments);
-//   int lifetime = rand() % 5 + 5;
-//   int seconds_passed = 0;
-//   printf("THREAD %d: Started.\n", index);
-//   while (seconds_passed <= lifetime) {
-//     seconds_passed++;
-//     for (long long i = CALCULATION_START;; i++) {
-//       if (is_prime(i)) {
-//         printf("THREAD %d found new prime number %lld\n", index, i);
-//       }
-//     }
-//   }
-//   printf("THREAD %d: Ended.\n", index);
-//   return NULL;
-// }
-
 int main(int argc, char **argv)
 {
   assert(argc == 2);
