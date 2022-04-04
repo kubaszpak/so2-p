@@ -6,7 +6,9 @@
 #include <math.h>
 #include <stdbool.h>
 
-#define CALCULATION_START 9999999999999999
+#define CALCULATION_START 10000000000000000
+#define MIN_THREAD_LIFETIME 5
+#define THREAD_LIFETIME_RANGE 5
 int *thread_lifetimes;
 
 bool is_prime(long long number)
@@ -37,7 +39,7 @@ void *perform_work(void *arguments)
     }
     i++;
   }
-  printf("THREAD %d: Ended.\n", index);
+  printf("THREAD %d: Ended its work.\n", index);
   return NULL;
 }
 
@@ -64,7 +66,7 @@ int main(int argc, char **argv)
   {
     printf("IN MAIN: Creating thread %d.\n", i);
     thread_args[i] = i;
-    thread_lifetimes[i] = rand() % 5 + 5;
+    thread_lifetimes[i] = rand() % MIN_THREAD_LIFETIME + THREAD_LIFETIME_RANGE;
     result_code = pthread_create(&threads[i], NULL, perform_work, &thread_args[i]);
     assert(!result_code);
   }
@@ -79,11 +81,11 @@ int main(int argc, char **argv)
     seconds++;
     for (int i = 0; i < number_of_threads; i++)
     {
-      if (thread_lifetimes[i] <= seconds && thread_lifetimes[i] != -1)
+      if (thread_lifetimes[i] != -1 && thread_lifetimes[i] <= seconds)
       {
         killed_threads_counter++;
         thread_lifetimes[i] = -1;
-        printf("IN MAIN: Thread %d has ended.\n", i);
+        printf("IN MAIN: Sending singal to end thread %d .\n", i);
       }
     }
   }
