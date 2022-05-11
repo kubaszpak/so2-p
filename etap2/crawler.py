@@ -22,6 +22,8 @@ SUPPORTED_CATEGORIES = [
     "technology"
 ]
 
+NONE_OPTION = "None"
+
 
 class App(tk.Tk):
     def __init__(self):
@@ -55,8 +57,15 @@ class App(tk.Tk):
             self.frame_right, text=name)
         label_new_source.pack()
 
-        self.subscriptions.append(Subscription(name, country_choice, category_choice))
-
+        kwargs = {}
+        if country_choice != NONE_OPTION:
+            kwargs['country_choice'] = country_choice
+        if category_choice != NONE_OPTION:
+            kwargs['category_choice'] = category_choice
+        new_subscription = Subscription(
+            name, **kwargs)
+        new_subscription.start()
+        self.subscriptions.append(new_subscription)
 
     def add_source_popup(self):
         popup = tk.Toplevel(self)
@@ -70,33 +79,25 @@ class App(tk.Tk):
         label_country = ttk.Label(popup, text="Country:")
         label_country.pack()
 
-        country_choice = tk.StringVar(popup, "-1")
+        country_choice = tk.StringVar(popup, NONE_OPTION)
+        ttk.Radiobutton(popup, text="All", variable=country_choice,
+                        value=NONE_OPTION).pack(ipady=5)
+        for (full_name, short_name) in SUPPORTED_COUNTRIES.items():
+            ttk.Radiobutton(popup, text=full_name, variable=country_choice,
+                            value=short_name).pack(ipady=5)
 
-        country_options = {}
-
-        for i, country in enumerate(SUPPORTED_COUNTRIES.keys()):
-            country_options[country] = str(i)
-
-        for (text, value) in country_options.items():
-            ttk.Radiobutton(popup, text=text, variable=country_choice,
-                            value=value).pack(ipady=5)
-
-        category_choice = tk.StringVar(popup, "-1")
-
-        category_options = {}
-
-        for i, category in enumerate(SUPPORTED_CATEGORIES):
-            category_options[category] = str(i)
+        category_choice = tk.StringVar(popup, NONE_OPTION)
 
         separator = ttk.Separator(popup, orient='horizontal')
         separator.pack(fill='x')
 
         label_category = ttk.Label(popup, text="Category:")
         label_category.pack()
-
-        for (text, value) in category_options.items():
-            ttk.Radiobutton(popup, text=text, variable=category_choice,
-                            value=value).pack(ipady=5)
+        ttk.Radiobutton(popup, text="All", variable=category_choice,
+                        value=NONE_OPTION).pack(ipady=5)
+        for category_name in SUPPORTED_CATEGORIES:
+            ttk.Radiobutton(popup, text=category_name, variable=category_choice,
+                            value=category_name).pack(ipady=5)
 
         separator = ttk.Separator(popup, orient='horizontal')
         separator.pack(fill='x')
@@ -105,15 +106,24 @@ class App(tk.Tk):
             if text_name.get('1.0', 'end') == '\n':
                 print("You need to put new subscription name!")
                 return
+
             self.add_source(
-                text_name.get('1.0', 'end'), country_choice.get(), category_choice.get())
+                text_name.get('1.0', 'end'), country_choice=country_choice.get(),
+                category_choice=category_choice.get())
             popup.destroy()
 
         button_add_source = ttk.Button(
             popup, text="Add subscription", command=submit_on_click)
         button_add_source.pack(fill="x", expand=True)
 
+    def on_close(self):
+        for subscription in app.subscriptions:
+            print(f"Stopping subscription {subscription.name}")
+            subscription.stop()
+        self.destroy()
+
 
 if __name__ == "__main__":
     app = App()
+    app.protocol("WM_DELETE_WINDOW", lambda: app.on_close())
     app.mainloop()
