@@ -11,15 +11,15 @@ load_dotenv()
 
 API_KEY = os.getenv('API_KEY')
 
-THREAD_INTERVAL_IN_SECONDS = 10
 TOP_HEADLINES_ENDPOINT = "https://newsapi.org/v2/top-headlines"
 
 
 class Subscription(threading.Thread):
-    def __init__(self, name, frame, country_choice=None, category_choice=None):
+    def __init__(self, name, frame, interval, country_choice=None, category_choice=None):
         super().__init__()
         self.headlines = {}
         self.name = name
+        self.interval = interval
         self.country_choice = country_choice
         self.category_choice = category_choice
         self.frame = frame
@@ -31,7 +31,7 @@ class Subscription(threading.Thread):
     def run(self):
         self.get_new_headlines()
         while self.__running.isSet():
-            while not self.__stopped.wait(THREAD_INTERVAL_IN_SECONDS):
+            while not self.__stopped.wait(self.interval):
                 self.get_new_headlines()
 
     def pause(self):

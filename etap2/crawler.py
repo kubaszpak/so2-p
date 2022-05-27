@@ -1,3 +1,4 @@
+from re import S
 import tkinter as tk
 from tkinter import ttk
 from scrollable_frame import ScrollableFrame
@@ -61,14 +62,14 @@ class App(tk.Tk):
             thread.resume()
             label_text.set(thread_name + '\nRunning [>]')
 
-    def add_source(self, name, country_choice, category_choice):
+    def add_source(self, name, interval, country_choice, category_choice):
         kwargs = {}
         if country_choice != NONE_OPTION:
             kwargs['country_choice'] = country_choice
         if category_choice != NONE_OPTION:
             kwargs['category_choice'] = category_choice
         new_subscription = Subscription(
-            name, self.frame_left, **kwargs)
+            name, self.frame_left, int(interval), **kwargs)
         print(f"Adding new subscription: {name} with parameters {kwargs}")
         new_subscription.start()
         self.subscriptions[name] = new_subscription
@@ -77,7 +78,7 @@ class App(tk.Tk):
         sep.pack(fill='x')
 
         label_text = tk.StringVar()
-        label_text.set(name + '\nRunning >>')
+        label_text.set(name + '\nRunning >>\n' + 'Interval: ' + interval)
         label_new_source = ttk.Label(
             self.frame_right, textvariable=label_text)
         label_new_source.pack()
@@ -95,6 +96,11 @@ class App(tk.Tk):
         label_name.pack()
         text_name = tk.Text(popup, height=1, width=15)
         text_name.pack()
+
+        label_interval = ttk.Label(popup, text="Interval:")
+        label_interval.pack()
+        text_interval = tk.Text(popup, height=1, width=3)
+        text_interval.pack()
 
         label_country = ttk.Label(popup, text="Country:")
         label_country.pack()
@@ -129,9 +135,12 @@ class App(tk.Tk):
             elif text_name.get('1.0', 'end').strip() in self.subscriptions:
                 print("Subscription with this name already exists!")
                 return
+            elif not text_interval.get('1.0', 'end').strip().isdigit() or int(text_interval.get('1.0', 'end').strip()) <= 0:
+                print("Interval must be a positive integer")
+                return
 
             self.add_source(
-                text_name.get('1.0', 'end').strip(), country_choice=country_choice.get(),
+                text_name.get('1.0', 'end').strip(), text_interval.get('1.0', 'end').strip(), country_choice=country_choice.get(),
                 category_choice=category_choice.get())
             popup.destroy()
 
