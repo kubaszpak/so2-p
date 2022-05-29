@@ -99,7 +99,7 @@ class App(tk.Tk):
 
         label_interval = ttk.Label(popup, text="Interval:")
         label_interval.pack()
-        text_interval = tk.Text(popup, height=1, width=3)
+        text_interval = tk.Text(popup, height=1, width=10)
         text_interval.pack()
 
         label_country = ttk.Label(popup, text="Country:")
@@ -137,6 +137,9 @@ class App(tk.Tk):
                 return
             elif not text_interval.get('1.0', 'end').strip().isdigit() or int(text_interval.get('1.0', 'end').strip()) <= 0:
                 print("Interval must be a positive integer")
+                return
+            elif country_choice.get() == NONE_OPTION and category_choice.get() == NONE_OPTION:
+                print("You need to choose either a country or a category")
                 return
 
             self.add_source(
